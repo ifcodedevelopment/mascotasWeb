@@ -1,0 +1,1 @@
+export const ID_ESTATUS_USUARIO_REGISTRO = 1;
