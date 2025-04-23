@@ -1,13 +1,17 @@
 import { usuarioAddSchema } from "../Validators/usuario.validator.js";
-import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario } from "../Models/usuario.model.js";
+import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario } from "../Models/usuario.model.js";
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { getDate, mailSend } from "../Config/config.js";
+import { ID_ESTATUS_USUARIO_REGISTRO } from "../Config/constants.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const templatePath = path.join(__dirname, '../Views/view_template_active.html');
+const templateActivate = path.join(__dirname, '../Views/view_html_activacion.html');
+const templateActivate2 = path.join(__dirname, '../Views/view_html_activacion_2.html');
+const template404 = path.join(__dirname, '../Views/view_html_404.html');
 
 
 export const addUsuario = async (req, res) => {
@@ -53,10 +57,7 @@ export const addUsuario = async (req, res) => {
                 htmlContent = htmlContent.replace('{{ENLACE}}', enlace)
                 htmlContent = htmlContent.replace('{{NOMBRE}}', params.nombre + ' ' + params.apellidoP + ' ' + params.apellidoM)
                 htmlContent = htmlContent.replace('{{ENLACE2}}', enlace)
-                htmlContent = htmlContent.replace('{{YEAR}}', getDate('Y'))
-
-                console.log('📄 HTML Content:', htmlContent.substring(0, 100)); 
-
+                htmlContent = htmlContent.replace('{{YEAR}}', getDate('Y'))                
 
                 const mail = {
                     to: params.email,
@@ -95,5 +96,19 @@ export const addUsuario = async (req, res) => {
                 text: 'Ha ocurrido un error, intente nuevamente'
             }
         })  
+    }
+}
+
+export const setActivacionCuenta = async(req, res) => {
+    const validacion = await validarCuentaPorCodigo(req.params.activate);
+    if(validacion != null){
+        if(validacion.id_estatus_usuarios == ID_ESTATUS_USUARIO_REGISTRO){
+            const actualizar = activarCuentaUsuario(validacion.id_usuario);
+            res.sendFile(templateActivate)
+        } else {
+            res.sendFile(templateActivate2)
+        }
+    } else {
+        res.sendFile(template404)
     }
 }

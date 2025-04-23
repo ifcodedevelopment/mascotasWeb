@@ -1,5 +1,5 @@
 import { mysql } from '../Config/db.js';
-import { ID_ESTATUS_USUARIO_REGISTRO } from '../Config/constants.js';
+import { ID_ESTATUS_USUARIO_ACTIVO, ID_ESTATUS_USUARIO_REGISTRO } from '../Config/constants.js';
 import { getDate } from '../Config/config.js';
 
 export const obtenerUsuarioPorEmail = async (email) => {
@@ -8,7 +8,7 @@ export const obtenerUsuarioPorEmail = async (email) => {
 };
 
 export const obtenerCodigoPorUsuario = async (id) => {
-    const [rows] = await mysql.query(`select MD5(CONCAT(id_usuario,'_', us_email)) as code from usuarios where id_usuario = ? `, [id]);
+    const [rows] = await mysql.query(`SELECT MD5(CONCAT(id_usuario,'_', us_email)) AS code FROM usuarios WHERE id_usuario = ? `, [id]);
     return rows[0];
 }
 
@@ -36,3 +36,14 @@ export const insertarUsuario = async (data) => {
     };
 }
 
+export const validarCuentaPorCodigo = async (codigo) => {
+    const [row] = await mysql.query(`SELECT * FROM usuarios WHERE MD5(CONCAT(id_usuario,'_', us_email)) = ? `, [codigo]);
+    return row[0];
+}
+
+export const activarCuentaUsuario = async(id) =>{
+    const [result] = await mysql.query(`UPDATE usuarios SET id_estatus_usuarios = ? WHERE id_usuario = ?`, [ID_ESTATUS_USUARIO_ACTIVO, id]);
+    return {
+        affectedRows: result.affectedRows
+    };
+}

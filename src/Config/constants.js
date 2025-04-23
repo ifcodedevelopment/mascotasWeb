@@ -1,1 +1,2 @@
 export const ID_ESTATUS_USUARIO_REGISTRO = 1;
+export const ID_ESTATUS_USUARIO_ACTIVO = 2;

@@ -1,7 +1,7 @@
 import { Router } from "express"
 
 import { ping } from "../Controllers/ping.controller.js";
-import { addUsuario } from "../Controllers/usuario.controller.js";
+import { addUsuario, setActivacionCuenta } from "../Controllers/usuario.controller.js";
 
 const router = Router()
 
@@ -101,6 +101,8 @@ router.get('/ping', ping)
  */
 router.post('/usuario/add', addUsuario);
 
+
+router.get('/usuario/activate/:activate', setActivacionCuenta);
 
 /*
 
