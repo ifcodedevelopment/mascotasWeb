@@ -1,7 +1,7 @@
 import { Router } from "express"
 
 import { ping } from "../Controllers/ping.controller.js";
-import { addUsuario, setActivacionCuenta } from "../Controllers/usuario.controller.js";
+import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo } from "../Controllers/usuario.controller.js";
 
 const router = Router()
 
@@ -101,8 +101,38 @@ router.get('/ping', ping)
  */
 router.post('/usuario/add', addUsuario);
 
-
+/**
+ * @swagger
+ * /usuario/activate/{activate}:
+ *   get:
+ *     summary: Activar cuenta de usuario
+ *     description: Valida el código de activación enviado por correo y activa la cuenta si corresponde.
+ *     tags:
+ *       - Usuario
+ *     parameters:
+ *       - in: path
+ *         name: activate
+ *         required: true
+ *         description: Código de activación
+ *         schema:
+ *           type: string
+ *           example: "c4ca4238a0b923820dcc509a6f75849b"
+ *     responses:
+ *       200:
+ *         description: HTML de éxito o estado correspondiente (ya activado, inválido)
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               example: "<html><body><h1>Cuenta activada correctamente</h1></body></html>"
+ *       404:
+ *         description: Código no válido o cuenta no encontrada
+ */
 router.get('/usuario/activate/:activate', setActivacionCuenta);
+
+
+router.post('/usuario/recuperar/codigo', sendCodigoRecuperacion);
+router.post('/usuario/validar/codigo', setValidacionCodigo);
 
 /*
 

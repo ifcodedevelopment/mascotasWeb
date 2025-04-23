@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Cuenta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #6FCF97;
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px dashed #6FCF97;
+            background: #f9f9f9;
+            display: inline-block;
+        }
+        .header {
+            background-color: #6FCF97; 
+            margin: 3px; 
+            padding: 5px; 
+            text-align: center; 
+            color: white;
+            font-size: 18px;
+            font-weight: bold
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Mascotas - Recuperación de Cuenta</h5>
+        </div>
+        <h3>Recuperación de Cuenta</h3>
+        <p>Hola,</p>
+        <p>Has solicitado restablecer tu contraseña. Utiliza el siguiente código de recuperación para completar el proceso:</p>
+        <div class="code">{{RECOVERY_CODE}}</div>
+        <p>Si no solicitaste restablecer tu contraseña, ignora este correo.</p>
+        <p>Gracias,</p>
+        <p>Tu equipo de soporte</p>
+    </div>
+</body>
+</html>

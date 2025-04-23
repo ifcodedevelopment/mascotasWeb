@@ -1,5 +1,5 @@
 import { usuarioAddSchema } from "../Validators/usuario.validator.js";
-import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario } from "../Models/usuario.model.js";
+import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId } from "../Models/usuario.model.js";
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -8,10 +8,11 @@ import { ID_ESTATUS_USUARIO_REGISTRO } from "../Config/constants.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const templatePath = path.join(__dirname, '../Views/view_template_active.html');
+const template = path.join(__dirname, '../Views/view_template_active.html');
 const templateActivate = path.join(__dirname, '../Views/view_html_activacion.html');
 const templateActivate2 = path.join(__dirname, '../Views/view_html_activacion_2.html');
 const template404 = path.join(__dirname, '../Views/view_html_404.html');
+const templateReset = path.join(__dirname, '../Views/view_template_reset.html')
 
 
 export const addUsuario = async (req, res) => {
@@ -51,7 +52,7 @@ export const addUsuario = async (req, res) => {
                 const codigo = await obtenerCodigoPorUsuario(insert.insertId);
                 
                 let htmlContent = '';
-                htmlContent = fs.readFileSync(templatePath, 'utf8');
+                htmlContent = fs.readFileSync(template, 'utf8');
                 
                 const enlace = `${req.protocol}://${req.get('host')}/usuario/activate/${codigo.code}`;
                 htmlContent = htmlContent.replace('{{ENLACE}}', enlace)
@@ -100,15 +101,124 @@ export const addUsuario = async (req, res) => {
 }
 
 export const setActivacionCuenta = async(req, res) => {
-    const validacion = await validarCuentaPorCodigo(req.params.activate);
-    if(validacion != null){
-        if(validacion.id_estatus_usuarios == ID_ESTATUS_USUARIO_REGISTRO){
-            const actualizar = activarCuentaUsuario(validacion.id_usuario);
-            res.sendFile(templateActivate)
+    try {
+        const validacion = await validarCuentaPorCodigo(req.params.activate);
+        if(validacion != null){
+            if(validacion.id_estatus_usuarios == ID_ESTATUS_USUARIO_REGISTRO){
+                const actualizar = await activarCuentaUsuario(validacion.id_usuario);
+                res.sendFile(templateActivate)
+            } else {
+                res.sendFile(templateActivate2)
+            }
         } else {
-            res.sendFile(templateActivate2)
-        }
-    } else {
+            res.sendFile(template404)
+        }   
+    } catch (error) {
         res.sendFile(template404)
+    }
+}
+
+export const sendCodigoRecuperacion = async(req, res) => {
+    try {
+        if(req.body.email){
+            const usuario = await obtenerUsuarioPorEmail(req.body.email);            
+            if(usuario != null){
+                let htmlContent = '';
+                htmlContent = fs.readFileSync(templateReset, 'utf8');
+
+                const recoveryCode = Math.floor(100000 + Math.random() * 900000)
+                htmlContent = htmlContent.replace('{{RECOVERY_CODE}}', recoveryCode)
+
+                const mail = {
+                    to: usuario.us_email,
+                    subject: 'Codigo de Recuperación - Mascotas App',
+                    content: htmlContent
+                }
+
+                const send_mail = await mailSend(mail)
+                if(send_mail){
+                    const updateCodigo = await guardarCodigoRecuperacion(recoveryCode, usuario.id_usuario);
+                }
+
+                res.json({
+                    status: (send_mail ? 200 : 400),
+                    response:{
+                        text: (send_mail ? 'Se ha enviado correctamente el código' : 'Ha ocurrido un error, intente nuevamente'),
+                        id_usuario: (send_mail ? usuario.id_usuario : null)
+                    } 
+                })
+            } else {
+                res.json({
+                    status: 404,
+                    response: {
+                        text: "El correo proporcionado no se encuentra registrado",
+                    },
+                })
+            }
+        } else {
+            res.json({
+                status: 404,
+                response: {
+                    text: "Ha ocurrido un error, intente nuevamente",
+                },
+            })
+        }
+    } catch (error) {
+        res.json({
+            status: 500,
+            response: {
+                //text: `Someting goes wrong ${error}`
+                text: "Ha ocurrido un error, intente nuevamente",
+            },
+        }) 
+    }
+}
+
+export const setValidacionCodigo = async(req, res) =>{
+    try {
+        if (req.body.id_usuario) {
+            const usuario = await obtenerUsuarioPorId(req.body.id_usuario);
+            if(usuario){
+                let valid = (req.body.codigo.length <= 0 || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
+                if(valid){
+                    res.json({
+                        status: 200,
+                        response: {
+                            text: 'Codigo valido',
+                            id_usuario: usuario.id_usuario
+                        }
+                    })
+                } else {
+                    res.json({
+                        status: 404,
+                        response: {
+                            text: 'El codigo introducido no es valido, favor de verificarlo'
+                        }
+                    })
+                }
+            } else {
+                res.json({
+                    status: 404,
+                    response: {
+                        text: "Ha ocurrido un error, el usuario no existe",
+                    },
+                })
+            }
+        } else {
+            res.json({
+                status: 404,
+                response: {
+                    text: "Ha ocurrido un error, intente nuevamente"
+                },
+            })
+        }
+    } catch (error) {
+        res.json({
+            status: 500,
+            response: {
+                text: "Ha ocurrido un error, intente nuevamente" + error
+                //text: "Ha ocurrido un error, intente nuevamente"
+            },
+        })
     }
 }

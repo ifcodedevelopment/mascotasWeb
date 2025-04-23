@@ -7,6 +7,11 @@ export const obtenerUsuarioPorEmail = async (email) => {
     return rows[0];
 };
 
+export const obtenerUsuarioPorId = async (id) => {
+    const [rows] = await mysql.query('SELECT * FROM usuarios WHERE id_usuario = ?', [id]);
+    return rows[0];
+};
+
 export const obtenerCodigoPorUsuario = async (id) => {
     const [rows] = await mysql.query(`SELECT MD5(CONCAT(id_usuario,'_', us_email)) AS code FROM usuarios WHERE id_usuario = ? `, [id]);
     return rows[0];
@@ -43,6 +48,13 @@ export const validarCuentaPorCodigo = async (codigo) => {
 
 export const activarCuentaUsuario = async(id) =>{
     const [result] = await mysql.query(`UPDATE usuarios SET id_estatus_usuarios = ? WHERE id_usuario = ?`, [ID_ESTATUS_USUARIO_ACTIVO, id]);
+    return {
+        affectedRows: result.affectedRows
+    };
+}
+
+export const guardarCodigoRecuperacion = async(codigo, id) =>{
+    const [result] = await mysql.query(`UPDATE usuarios SET us_codigo_app = ? WHERE id_usuario = ?`, [codigo, id]);
     return {
         affectedRows: result.affectedRows
     };
