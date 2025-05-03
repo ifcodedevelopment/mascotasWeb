@@ -17,6 +17,12 @@ export const obtenerCodigoPorUsuario = async (id) => {
     return rows[0];
 }
 
+export const obtenerUsuarioPorEmailPassword = async (email, password) => {
+    const [rows] = await mysql.query('SELECT * FROM usuarios WHERE us_email = ? AND us_password = ?', [email, password]);
+    return rows[0];
+};
+
+
 export const insertarUsuario = async (data) => {
     const [result] = await mysql.query(
          `INSERT INTO usuarios
@@ -55,6 +61,20 @@ export const activarCuentaUsuario = async(id) =>{
 
 export const guardarCodigoRecuperacion = async(codigo, id) =>{
     const [result] = await mysql.query(`UPDATE usuarios SET us_codigo_app = ? WHERE id_usuario = ?`, [codigo, id]);
+    return {
+        affectedRows: result.affectedRows
+    };
+}
+
+export const updatePasswordUsuario = async(password, id) =>{
+    const [result] = await mysql.query(`UPDATE usuarios SET us_password = ?, us_codigo_app = ? WHERE id_usuario = ?`, [password, null, id]);
+    return {
+        affectedRows: result.affectedRows
+    };
+}
+
+export const updateTokenUsuario = async(token, id) => {
+    const [result] = await mysql.query(`UPDATE usuarios SET us_token = ? WHERE id_usuario = ?`, [token, id]);
     return {
         affectedRows: result.affectedRows
     };

@@ -15,7 +15,8 @@ export const DB_PASSWORD = process.env.DB_PASSWORD || ''
 export const DB_DATABASE = process.env.DB_DATABASE || 'companydb'
 
 //JWT
-export const SECRET_KEY = process.env.SECRET_KEY || ''
+export const SECRET_KEY_JWT = process.env.JWT_SECRET || ''
+export const EXPIRES_KEY_JWT = process.env.JWT_EXPIRES_IN || ''
 
 //Mail
 export const MAIL_USER = process.env.MAIL_USER || ''

@@ -1,5 +1,5 @@
 import { usuarioAddSchema } from "../Validators/usuario.validator.js";
-import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId } from "../Models/usuario.model.js";
+import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId, updatePasswordUsuario } from "../Models/usuario.model.js";
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -40,9 +40,9 @@ export const addUsuario = async (req, res) => {
                 return res.json({
                     status: 404,
                     response: {
-                      text: 'Ya existe un usuario con ese email, favor de validar su información'
+                        text: 'Ya existe un usuario con ese email, favor de validar su información'
                     }
-                  });
+                });
             }
 
             //si no existe se inserta el usuario
@@ -50,15 +50,15 @@ export const addUsuario = async (req, res) => {
 
             if (insert.affectedRows > 0) {
                 const codigo = await obtenerCodigoPorUsuario(insert.insertId);
-                
+
                 let htmlContent = '';
                 htmlContent = fs.readFileSync(template, 'utf8');
-                
+
                 const enlace = `${req.protocol}://${req.get('host')}/usuario/activate/${codigo.code}`;
                 htmlContent = htmlContent.replace('{{ENLACE}}', enlace)
                 htmlContent = htmlContent.replace('{{NOMBRE}}', params.nombre + ' ' + params.apellidoP + ' ' + params.apellidoM)
                 htmlContent = htmlContent.replace('{{ENLACE2}}', enlace)
-                htmlContent = htmlContent.replace('{{YEAR}}', getDate('Y'))                
+                htmlContent = htmlContent.replace('{{YEAR}}', getDate('Y'))
 
                 const mail = {
                     to: params.email,
@@ -96,15 +96,15 @@ export const addUsuario = async (req, res) => {
                 //text: `Someting goes wrong ${error}`
                 text: 'Ha ocurrido un error, intente nuevamente'
             }
-        })  
+        })
     }
 }
 
-export const setActivacionCuenta = async(req, res) => {
+export const setActivacionCuenta = async (req, res) => {
     try {
         const validacion = await validarCuentaPorCodigo(req.params.activate);
-        if(validacion != null){
-            if(validacion.id_estatus_usuarios == ID_ESTATUS_USUARIO_REGISTRO){
+        if (validacion != null) {
+            if (validacion.id_estatus_usuarios == ID_ESTATUS_USUARIO_REGISTRO) {
                 const actualizar = await activarCuentaUsuario(validacion.id_usuario);
                 res.sendFile(templateActivate)
             } else {
@@ -112,17 +112,17 @@ export const setActivacionCuenta = async(req, res) => {
             }
         } else {
             res.sendFile(template404)
-        }   
+        }
     } catch (error) {
         res.sendFile(template404)
     }
 }
 
-export const sendCodigoRecuperacion = async(req, res) => {
+export const sendCodigoRecuperacion = async (req, res) => {
     try {
-        if(req.body.email){
-            const usuario = await obtenerUsuarioPorEmail(req.body.email);            
-            if(usuario != null){
+        if (req.body.email) {
+            const usuario = await obtenerUsuarioPorEmail(req.body.email);
+            if (usuario != null) {
                 let htmlContent = '';
                 htmlContent = fs.readFileSync(templateReset, 'utf8');
 
@@ -136,16 +136,16 @@ export const sendCodigoRecuperacion = async(req, res) => {
                 }
 
                 const send_mail = await mailSend(mail)
-                if(send_mail){
+                if (send_mail) {
                     const updateCodigo = await guardarCodigoRecuperacion(recoveryCode, usuario.id_usuario);
                 }
 
                 res.json({
                     status: (send_mail ? 200 : 400),
-                    response:{
+                    response: {
                         text: (send_mail ? 'Se ha enviado correctamente el código' : 'Ha ocurrido un error, intente nuevamente'),
                         id_usuario: (send_mail ? usuario.id_usuario : null)
-                    } 
+                    }
                 })
             } else {
                 res.json({
@@ -170,17 +170,17 @@ export const sendCodigoRecuperacion = async(req, res) => {
                 //text: `Someting goes wrong ${error}`
                 text: "Ha ocurrido un error, intente nuevamente",
             },
-        }) 
+        })
     }
 }
 
-export const setValidacionCodigo = async(req, res) =>{
+export const setValidacionCodigo = async (req, res) => {
     try {
         if (req.body.id_usuario) {
             const usuario = await obtenerUsuarioPorId(req.body.id_usuario);
-            if(usuario){
+            if (usuario) {
                 let valid = (req.body.codigo.length <= 0 || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
-                if(valid){
+                if (valid) {
                     res.json({
                         status: 200,
                         response: {
@@ -210,6 +210,54 @@ export const setValidacionCodigo = async(req, res) =>{
                 response: {
                     text: "Ha ocurrido un error, intente nuevamente"
                 },
+            })
+        }
+    } catch (error) {
+        res.json({
+            status: 500,
+            response: {
+                text: "Ha ocurrido un error, intente nuevamente" + error
+                //text: "Ha ocurrido un error, intente nuevamente"
+            },
+        })
+    }
+}
+
+export const updatePassword = async (req, res) => {
+    try {
+        if (req.body.password && req.body.id_usuario) {
+            const usuario = await obtenerUsuarioPorId(req.body.id_usuario);
+            if (usuario) {
+                const update = await updatePasswordUsuario(req.body.password, req.body.id_usuario);
+                if (update) {
+                    res.json({
+                        status: 200,
+                        response: {
+                            text: 'Se ha actualizado correctamente su contraseña'
+                        }
+                    });
+                } else {
+                    res.json({
+                        status: 404,
+                        response: {
+                            text: 'Ha ocurrido un error, intente nuevamente'
+                        }
+                    })
+                }
+            } else {
+                res.json({
+                    status: 404,
+                    response: {
+                        text: 'El usuario no existe, favor de validar su información'
+                    }
+                })
+            }
+        } else {
+            es.json({
+                status: 404,
+                response: {
+                    text: 'Ha ocurrido un error, favor de validar su información'
+                }
             })
         }
     } catch (error) {

@@ -1,7 +1,8 @@
 import { Router } from "express"
 
 import { ping } from "../Controllers/ping.controller.js";
-import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo } from "../Controllers/usuario.controller.js";
+import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo, updatePassword } from "../Controllers/usuario.controller.js";
+import { authLogin } from "../Controllers/auth.controller.js";
 
 const router = Router()
 
@@ -133,6 +134,10 @@ router.get('/usuario/activate/:activate', setActivacionCuenta);
 
 router.post('/usuario/recuperar/codigo', sendCodigoRecuperacion);
 router.post('/usuario/validar/codigo', setValidacionCodigo);
+router.post('/usuario/update/password', updatePassword);
+
+
+router.post('/auth/login', authLogin)
 
 /*
 
