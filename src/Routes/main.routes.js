@@ -1,10 +1,16 @@
 import { Router } from "express"
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 import { ping } from "../Controllers/ping.controller.js";
 import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo, updatePassword } from "../Controllers/usuario.controller.js";
 import { authLogin } from "../Controllers/auth.controller.js";
+import { swaggerOptions } from "../Config/swaggerOptions.js";
 
 const router = Router()
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+router.use('/documentacion', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 /**
  * Metodos Ping 
@@ -131,12 +137,203 @@ router.post('/usuario/add', addUsuario);
  */
 router.get('/usuario/activate/:activate', setActivacionCuenta);
 
-
+/**
+ * @swagger
+ * /usuario/recuperar/codigo:
+ *   post:
+ *     summary: Enviar código de recuperación por correo
+ *     description: Envía un código de 6 dígitos al correo del usuario para permitir la recuperación de contraseña.
+ *     tags:
+ *       - Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: juan.perez@example.com
+ *     responses:
+ *       200:
+ *         description: Código enviado correctamente
+ *       404:
+ *         description: Correo no registrado o datos inválidos
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post('/usuario/recuperar/codigo', sendCodigoRecuperacion);
+
+/**
+ * @swagger
+ * /usuario/validar/codigo:
+ *   post:
+ *     summary: Validar código de recuperación
+ *     description: Verifica que el código ingresado sea válido para el usuario.
+ *     tags:
+ *       - Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id_usuario
+ *               - codigo
+ *             properties:
+ *               id_usuario:
+ *                 type: integer
+ *                 example: 5
+ *               codigo:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: Código válido
+ *       404:
+ *         description: Código inválido o usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post('/usuario/validar/codigo', setValidacionCodigo);
+
+/**
+ * @swagger
+ * /usuario/update/password:
+ *   post:
+ *     summary: Actualizar la contraseña del usuario
+ *     description: Permite cambiar la contraseña del usuario una vez validado el código de recuperación.
+ *     tags:
+ *       - Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id_usuario
+ *               - password
+ *             properties:
+ *               id_usuario:
+ *                 type: integer
+ *                 example: 5
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: nuevaPassword123
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada correctamente
+ *       404:
+ *         description: Usuario no encontrado o datos incompletos
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post('/usuario/update/password', updatePassword);
 
-
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     description: Verifica las credenciales del usuario. Si la cuenta está activada, retorna sus datos y un JWT. Si no, envía un correo con el enlace de activación.
+ *     tags:
+ *       - Autenticación
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: juan.perez@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: segura123
+ *               token:
+ *                 type: string
+ *                 description: Token del dispositivo (opcional, para notificaciones push u otras funciones)
+ *                 example: fcm_token_opcional
+ *     responses:
+ *       200:
+ *         description: Usuario autenticado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         nombre:
+ *                           type: string
+ *                           example: Juan
+ *                         apellidoPaterno:
+ *                           type: string
+ *                           example: Pérez
+ *                         apellidoMaterno:
+ *                           type: string
+ *                           example: López
+ *                         fechaNacimiento:
+ *                           type: string
+ *                           format: date
+ *                           example: 1995-06-15
+ *                         sexo:
+ *                           type: string
+ *                           enum: [M, F]
+ *                           example: M
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                           example: juan.perez@example.com
+ *                         password:
+ *                           type: string
+ *                           example: segura123
+ *                         token:
+ *                           type: string
+ *                           description: JWT generado para autenticación
+ *                           example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+ *                         img:
+ *                           type: string
+ *                           example: http://localhost:3000/uploads/perfil.jpg
+ *       404:
+ *         description: Usuario no activado o credenciales inválidas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: El usuario y/o contraseña son incorrectos
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post('/auth/login', authLogin)
 
 /*

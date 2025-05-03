@@ -179,7 +179,8 @@ export const setValidacionCodigo = async (req, res) => {
         if (req.body.id_usuario) {
             const usuario = await obtenerUsuarioPorId(req.body.id_usuario);
             if (usuario) {
-                let valid = (req.body.codigo.length <= 0 || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
+                const regex = /^\d{6}$/;
+                let valid = (!regex.test(req.body.codigo) || req.body.codigo.length <= 0 || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
                 if (valid) {
                     res.json({
                         status: 200,
@@ -253,7 +254,7 @@ export const updatePassword = async (req, res) => {
                 })
             }
         } else {
-            es.json({
+            res.json({
                 status: 404,
                 response: {
                     text: 'Ha ocurrido un error, favor de validar su información'
