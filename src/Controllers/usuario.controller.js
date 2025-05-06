@@ -3,7 +3,8 @@ import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, valid
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { getDate, mailSend } from "../Config/config.js";
+import { getDate } from "../Utils/date.helper.js";
+import { mailSend } from "../Utils/mail.helper.js";
 import { ID_ESTATUS_USUARIO_REGISTRO } from "../Config/constants.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +37,7 @@ export const addUsuario = async (req, res) => {
             const usuarioExistente = await obtenerUsuarioPorEmail(params.email);
 
             //si existe el usuario marca error 404
-            if (usuarioExistente) {
+            if (usuarioExistente.length > 0) {
                 return res.json({
                     status: 404,
                     response: {

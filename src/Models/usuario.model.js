@@ -1,6 +1,6 @@
 import { mysql } from '../Config/db.js';
 import { ID_ESTATUS_USUARIO_ACTIVO, ID_ESTATUS_USUARIO_REGISTRO } from '../Config/constants.js';
-import { getDate } from '../Config/config.js';
+import { getDate } from '../Utils/date.helper.js';
 
 export const obtenerUsuarioPorEmail = async (email) => {
     const [rows] = await mysql.query('SELECT * FROM usuarios WHERE us_email = ?', [email]);

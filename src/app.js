@@ -1,21 +1,18 @@
 import express from 'express'
-import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc from 'swagger-jsdoc';
-import { swaggerOptions } from './Config/swaggerOptions.js';
-import indexRoutes from './Routes/main.routes.js'
+import router from './Routes/index.js'
+import path from 'path';
 
 const app = express()
-const specs = swaggerJSDoc(swaggerOptions);
-
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
 app.use(express.json())
 
-//rutas swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 //rutas index
-app.use(indexRoutes)
+app.use(router)
+
+//poder visualizar las imagenes QR
+app.use('/uploads', express.static(path.resolve('uploads')));
 
 //default middleware
 app.use((req, res) => {

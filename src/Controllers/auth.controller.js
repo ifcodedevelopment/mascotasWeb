@@ -5,7 +5,9 @@ import { fileURLToPath } from 'url'
 
 import { obtenerCodigoPorUsuario, obtenerUsuarioPorEmailPassword, updateTokenUsuario } from "../Models/usuario.model.js";
 import { authLoginSchema } from "../Validators/auth.validator.js"
-import { EXPIRES_KEY_JWT, getDate, mailSend, SECRET_KEY_JWT } from '../Config/config.js';
+import { EXPIRES_KEY_JWT, SECRET_KEY_JWT } from '../Config/config.js';
+import { getDate } from '../Utils/date.helper.js';
+import { mailSend } from '../Utils/mail.helper.js';
 import { ID_ESTATUS_USUARIO_ACTIVO } from '../Config/constants.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,15 +32,17 @@ export const authLogin = async (req, res) => {
                     status: 200,
                     response: {
                         user: {
-                            nombre: usuario.nombre,
-                            apellidoPaterno: usuario.us_apellido_p,
-                            apellidoMaterno: usuario.us_apellido_m,
-                            fechaNacimiento: usuario.us_fecha_nac,
-                            sexo: usuario.us_sexo,
+                            img: req.protocol + '://' + req.get('host') + '/uploads/' + (usuario.us_foto != null ? usuario.us_foto : 'perfil.jpg'),
+                            names: usuario.nombre,
+                            firstLast: usuario.us_apellido_p,
+                            secondLast: usuario.us_apellido_m,
+                            birthDate: usuario.us_fecha_nac,
+                            sex: usuario.us_sexo,
+                            phoneNumber: usuario.us_telefono,
+                            landline: usuario.us_telefono_fijo,
                             email: usuario.us_email,
                             password: usuario.us_password,
-                            token: jwt.sign({ id: usuario.id_usuario }, SECRET_KEY_JWT, { expiresIn: EXPIRES_KEY_JWT }),
-                            img: req.protocol + '://' + req.get('host') + '/uploads/' + (usuario.us_foto != null ? usuario.us_foto : 'perfil.jpg')
+                            token: jwt.sign({ id: usuario.id_usuario }, SECRET_KEY_JWT, { expiresIn: EXPIRES_KEY_JWT })
                         }
                     }
                 })
