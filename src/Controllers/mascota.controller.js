@@ -1,5 +1,5 @@
-import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
@@ -9,9 +9,11 @@ import { obtenerReportePorMascota } from "../Models/reporte.model.js";
 import { asegurarImagenFavorita } from "../Utils/galeria.helper.js";
 import { hashMD5 } from "../Utils/hash.helper.js";
 import { mascotaAddSchema } from "../Validators/mascota.validator.js";
-import { generarQR } from '../Utils/qr.helper.js';
+import { generarQRConEstilo } from '../Utils/generarQRConEstilo.js';
 import { guardarImagenBase64 } from '../Utils/file.helper.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 export const agregarMascotasUsuario = async (req, res) => {
@@ -61,7 +63,8 @@ export const agregarMascotasUsuario = async (req, res) => {
             const insert = await insertarMascota(params);
             if(insert.affectedRows > 0){
                 const hash = hashMD5('masc-'+ insert.insertId + '-user-' + params.idUsuario);
-                const qrBase64 = await generarQR(hash);
+                const rutaLogo = path.join(__dirname, '../Assets/img/logo.jpeg');
+                const qrBase64 = await generarQRConEstilo(hash, rutaLogo);
                 const ruta = guardarImagenBase64(qrBase64, idUsuario, 'qr_' + insert.insertId, req);                
                 const updateUrl = await updateUrlQR(ruta, insert.insertId);
                 res.json({
