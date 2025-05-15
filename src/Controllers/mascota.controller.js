@@ -3,12 +3,12 @@ import { fileURLToPath } from 'url';
 
 import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
-import { obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
-import { insertarMascota, obtenerMascotaNombreFechaNac, obtenerMascotasPorUsuario, updateUrlQR } from "../Models/mascota.model.js";
+import { eliminarGaleria, insertarGaleria, obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
+import { actualizarMascota, insertarMascota, obtenerMascotaNombreFechaNac, obtenerMascotasPorId, obtenerMascotasPorUsuario, updateUrlQR } from "../Models/mascota.model.js";
 import { obtenerReportePorMascota } from "../Models/reporte.model.js";
 import { asegurarImagenFavorita } from "../Utils/galeria.helper.js";
 import { hashMD5 } from "../Utils/hash.helper.js";
-import { mascotaAddSchema } from "../Validators/mascota.validator.js";
+import { mascotaAddSchema, mascotaEditSchema } from "../Validators/mascota.validator.js";
 import { generarQRConEstilo } from '../Utils/generarQRConEstilo.js';
 import { guardarImagenBase64 } from '../Utils/file.helper.js';
 
@@ -47,7 +47,7 @@ export const agregarMascotasUsuario = async (req, res) => {
             const mascotaExistente = await obtenerMascotaNombreFechaNac(params.nombreMascota, params.fechaNacimiento);
             
             //si existe el usuario marca error 404
-            if (mascotaExistente.length > 0) {
+            if (mascotaExistente.length != null && mascotaExistente.id_usuario == idUsuario) {
                 return res.json({
                     status: 404,
                     response: {
@@ -67,6 +67,11 @@ export const agregarMascotasUsuario = async (req, res) => {
                 const qrBase64 = await generarQRConEstilo(hash, rutaLogo);
                 const ruta = guardarImagenBase64(qrBase64, idUsuario, 'qr_' + insert.insertId, req);                
                 const updateUrl = await updateUrlQR(ruta, insert.insertId);
+
+                for (const galeria of req.body.galery) {
+                    const insertGalery = await insertarGaleria(insert.insertId, galeria);
+                }
+
                 res.json({
                     status: 200,
                     response: {
@@ -85,7 +90,8 @@ export const agregarMascotasUsuario = async (req, res) => {
             res.json({
                 status: 404,
                 response: {
-                    text: `Ha ocurrido un error, favor de validar su información ${error}`
+                    text: `Ha ocurrido un error, favor de validar su información`
+                    //text: `Ha ocurrido un error, favor de validar su información ${error}`
                 }
             })
         }
@@ -93,8 +99,8 @@ export const agregarMascotasUsuario = async (req, res) => {
         res.status(500).json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`
-                //text: 'Ha ocurrido un error, intente nuevamente'
+                //text: `Someting goes wrong ${error}`
+                text: 'Ha ocurrido un error, intente nuevamente'
             }
         });
     }
@@ -133,7 +139,6 @@ export const obtenerMascotasUsuario = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Error en obtenerMascotasUsuario:", error);
         res.status(500).json({
             status: 500,
             response: {
@@ -143,3 +148,88 @@ export const obtenerMascotasUsuario = async (req, res) => {
         });
     }
 };
+
+
+export const editarMascotasUsuario = async (req, res) => {
+    try {
+        const idUsuario = req.idUsuario; // Middleware debe haberlo inyectado
+        if (!idUsuario) {
+            return res.status(400).json({
+                status: 400,
+                  response: {
+                    text: 'ID de usuario no proporcionado en el token.'
+                }
+            });
+        }
+
+        const params = {
+            idMascota: req.body.id_mascota,
+            nombreMascota: req.body.nombre_mascota,
+            fechaNacimiento: req.body.fecha_nacimiento,
+            galery: [],
+            tipo: req.body.tipo,
+            raza: req.body.raza,
+            color: req.body.color,
+            temperamento: req.body.temperamento,
+            caracteristicas: req.body.caracteristicas,
+            medicas: req.body.medicas 
+        }
+
+        const { error } = mascotaEditSchema.validate(params)
+        if (!error) {
+            //Validacion mascota existente
+            const mascotaExistente = await obtenerMascotasPorId(params.idMascota);
+            
+            //si existe el usuario marca error 404
+            if (mascotaExistente == null) {
+                return res.json({
+                    status: 404,
+                    response: {
+                        text: 'No existe la mascota, favor de validar su información'
+                    }
+                });
+            }
+
+            // Asegura que haya una imagen favorita
+            req.body.galery = asegurarImagenFavorita(req.body.galery); 
+
+            const insert = await actualizarMascota(params.idMascota, params);
+            if(insert.affectedRows > 0){
+                const eliminarGalery = await eliminarGaleria(params.idMascota);
+                for (const galeria of req.body.galery) {
+                    const insertGalery = await insertarGaleria(params.idMascota, galeria);
+                }
+
+                res.json({
+                    status: 200,
+                    response: {
+                        text: 'Se ha actualizado la mascota correctamente'
+                    }
+                })
+            } else{
+                res.json({
+                    status: 404,
+                    response: {
+                        text: 'Ha ocurrido un error, intente nuevamente'
+                    }
+                })
+            }
+        } else {
+            res.json({
+                status: 404,
+                response: {
+                    //text: `Ha ocurrido un error, favor de validar su información ${error}`
+                    text: `Ha ocurrido un error, favor de validar su información`
+                }
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            status: 500,
+            response: {
+                //text: `Someting goes wrong ${error}`
+                text: 'Ha ocurrido un error, intente nuevamente'
+            }
+        });
+    }
+}

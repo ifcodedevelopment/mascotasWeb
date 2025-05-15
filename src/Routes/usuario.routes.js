@@ -1,5 +1,6 @@
 import { Router } from "express"
-import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo, updatePassword } from "../Controllers/usuario.controller.js";
+import { addUsuario, sendCodigoRecuperacion, setActivacionCuenta, setValidacionCodigo, updatePassword, updateUsuario } from "../Controllers/usuario.controller.js";
+import { validarToken } from "../Middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -200,5 +201,8 @@ router.post('/usuario/validar/codigo', setValidacionCodigo);
  *         description: Error interno del servidor
  */
 router.post('/usuario/update/password', updatePassword);
+
+
+router.post('/usuario/update', validarToken, updateUsuario);
 
 export default router;

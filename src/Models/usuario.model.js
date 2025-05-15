@@ -25,24 +25,47 @@ export const obtenerUsuarioPorEmailPassword = async (email, password) => {
 
 export const insertarUsuario = async (data) => {
     const [result] = await mysql.query(
-         `INSERT INTO usuarios
+        `INSERT INTO usuarios
             (id_estatus_usuarios, us_apellido_p, us_apellido_m, us_nombre, us_fecha_nac, us_sexo, us_telefono, us_telefono_fijo, us_email, us_password, us_fecha_registro)
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-                ID_ESTATUS_USUARIO_REGISTRO,
-                data.apellidoP,
-                data.apellidoM,
-                data.nombre,
-                data.fechaNac,
-                data.sexo,
-                data.telefono,
-                data.telefonoFijo,
-                data.email,
-                data.password,
-                getDate('Y-m-d H:i:s')
-            ]
+        ID_ESTATUS_USUARIO_REGISTRO,
+        data.apellidoP,
+        data.apellidoM,
+        data.nombre,
+        data.fechaNac,
+        data.sexo,
+        data.telefono,
+        data.telefonoFijo,
+        data.email,
+        data.password,
+        getDate('Y-m-d H:i:s')
+    ]
     )
     return {
         insertId: result.insertId,
+        affectedRows: result.affectedRows
+    };
+}
+
+export const actualizarUsuario = async (id, data) => {
+    const [result] = await mysql.query(
+        `UPDATE usuarios
+            SET us_apellido_p= ?, us_apellido_m = ? , us_nombre = ?, us_fecha_nac = ?, us_sexo = ?, us_telefono = ?, us_telefono_fijo = ?, us_email = ?,
+            us_password = ?, us_fecha_updated = ? WHERE id_usuario = ?`, [
+        data.apellidoP,
+        data.apellidoM,
+        data.nombre,
+        data.fechaNac,
+        data.sexo,
+        data.telefono,
+        data.telefonoFijo,
+        data.email,
+        data.password,
+        getDate('Y-m-d H:i:s'),
+        id
+    ]
+    )
+    return {
         affectedRows: result.affectedRows
     };
 }
@@ -52,28 +75,28 @@ export const validarCuentaPorCodigo = async (codigo) => {
     return row[0];
 }
 
-export const activarCuentaUsuario = async(id) =>{
+export const activarCuentaUsuario = async (id) => {
     const [result] = await mysql.query(`UPDATE usuarios SET id_estatus_usuarios = ? WHERE id_usuario = ?`, [ID_ESTATUS_USUARIO_ACTIVO, id]);
     return {
         affectedRows: result.affectedRows
     };
 }
 
-export const guardarCodigoRecuperacion = async(codigo, id) =>{
+export const guardarCodigoRecuperacion = async (codigo, id) => {
     const [result] = await mysql.query(`UPDATE usuarios SET us_codigo_app = ? WHERE id_usuario = ?`, [codigo, id]);
     return {
         affectedRows: result.affectedRows
     };
 }
 
-export const updatePasswordUsuario = async(password, id) =>{
+export const updatePasswordUsuario = async (password, id) => {
     const [result] = await mysql.query(`UPDATE usuarios SET us_password = ?, us_codigo_app = ? WHERE id_usuario = ?`, [password, null, id]);
     return {
         affectedRows: result.affectedRows
     };
 }
 
-export const updateTokenUsuario = async(token, id) => {
+export const updateTokenUsuario = async (token, id) => {
     const [result] = await mysql.query(`UPDATE usuarios SET us_token = ? WHERE id_usuario = ?`, [token, id]);
     return {
         affectedRows: result.affectedRows

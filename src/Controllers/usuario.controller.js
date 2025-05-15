@@ -1,5 +1,5 @@
-import { usuarioAddSchema } from "../Validators/usuario.validator.js";
-import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId, updatePasswordUsuario } from "../Models/usuario.model.js";
+import { usuarioAddSchema, usuarioEditSchema } from "../Validators/usuario.validator.js";
+import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId, updatePasswordUsuario, actualizarUsuario } from "../Models/usuario.model.js";
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -269,6 +269,83 @@ export const updatePassword = async (req, res) => {
                 text: "Ha ocurrido un error, intente nuevamente" + error
                 //text: "Ha ocurrido un error, intente nuevamente"
             },
+        })
+    }
+}
+
+export const updateUsuario = async (req, res) => {
+    try {
+        const idUsuario = req.idUsuario; // Middleware debe haberlo inyectado
+        if (!idUsuario) {
+            return res.status(400).json({
+                status: 400,
+                response: {
+                    text: 'ID de usuario no proporcionado en el token.'
+                }
+            });
+        }
+
+        const params = {
+            nombre: req.body.nombres,
+            apellidoP: req.body.ape_paterno,
+            apellidoM: req.body.ape_materno,
+            fechaNac: req.body.fecha_nacimiento,
+            sexo: req.body.sexo,
+            telefono: req.body.telefono_personal,
+            telefonoFijo: req.body.telefono_fijo,
+            email: req.body.correo,
+            password: req.body.password
+        }
+
+        const { error } = usuarioEditSchema.validate(params)
+
+        if (!error) {
+            //Validacion email existente con otro email
+            const usuarioExistente = await obtenerUsuarioPorEmail(params.email);
+
+            //si existe el usuario y no es el que se esta editando marca error 404
+            if (usuarioExistente != null && usuarioExistente.id_usuario != idUsuario) {
+                return res.json({
+                    status: 404,
+                    response: {
+                        text: 'Ya existe un usuario con ese email, favor de validar su información'
+                    }
+                });
+            }
+
+            //si existe pero es el mismo usuario lo actualiza, si no marca error
+            const update = await actualizarUsuario(idUsuario, params);
+
+            if (update.affectedRows > 0) {
+                res.json({
+                    status: 200,
+                    response: {
+                        text: 'Se ha actualizado la cuenta correctamente'
+                    }
+                })
+            } else {
+                res.json({
+                    status: 404,
+                    response: {
+                        text: 'Ha ocurrido un error, intente nuevamente'
+                    }
+                })
+            }
+        } else {
+            res.json({
+                status: 404,
+                response: {
+                    text: 'Ha ocurrido un error, favor de validar su información'
+                }
+            })
+        }
+    } catch (error) {
+        res.json({
+            status: 500,
+            response: {
+                text: `Someting goes wrong ${error}`
+                //text: 'Ha ocurrido un error, intente nuevamente'
+            }
         })
     }
 }
