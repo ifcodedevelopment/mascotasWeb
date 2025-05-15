@@ -30,3 +30,8 @@ export const formatDate_DMY = (date) => {
     const fecha = new Date(date)
     return ("0" + fecha.getDate()).slice(-2) + "-" + ("0" + (fecha.getMonth() + 1)).slice(-2) + "-" + fecha.getFullYear()
 }
+
+export const formatDate_YMD = (date) => {
+    const fecha = new Date(date)
+    return (fecha.getFullYear()) + "-" + ("0" + (fecha.getMonth() + 1)).slice(-2) + "-" + ("0" + fecha.getDate()).slice(-2);
+}
