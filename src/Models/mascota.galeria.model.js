@@ -1,7 +1,7 @@
 import { mysql } from '../Config/db.js';
 import { getDate } from '../Utils/date.helper.js';
 export const obtenerGaleriaPorMascota = async (id) => {
-    const [rows] = await mysql.query('SELECT * FROM galeria_mascotas WHERE id_mascota = ?', [id]);
+    const [rows] = await mysql.query('SELECT * FROM galeria_mascotas WHERE id_mascota = ? ORDER BY gl_favorito DESC', [id]);
     return rows;
 }
 

@@ -4,13 +4,14 @@ import { fileURLToPath } from 'url';
 import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
 import { eliminarGaleria, insertarGaleria, obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
-import { actualizarMascota, insertarMascota, obtenerMascotaNombreFechaNac, obtenerMascotasPorId, obtenerMascotasPorUsuario, updateUrlQR } from "../Models/mascota.model.js";
+import { actualizarMascota, insertarMascota, obtenerMascotaNombreFechaNac, obtenerMascotaPorSha, obtenerMascotasPorId, obtenerMascotasPorUsuario, updateUrlQR } from "../Models/mascota.model.js";
 import { obtenerReportePorMascota } from "../Models/reporte.model.js";
 import { asegurarImagenFavorita } from "../Utils/galeria.helper.js";
 import { hashMD5 } from "../Utils/hash.helper.js";
 import { mascotaAddSchema, mascotaEditSchema } from "../Validators/mascota.validator.js";
 import { generarQRConEstilo } from '../Utils/generarQRConEstilo.js';
 import { guardarImagenBase64 } from '../Utils/file.helper.js';
+import { obtenerUsuarioPorId } from '../Models/usuario.model.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,7 +48,7 @@ export const agregarMascotasUsuario = async (req, res) => {
             const mascotaExistente = await obtenerMascotaNombreFechaNac(params.nombreMascota, params.fechaNacimiento);
             
             //si existe el usuario marca error 404
-            if (mascotaExistente.length != null && mascotaExistente.id_usuario == idUsuario) {
+            if (mascotaExistente != null && mascotaExistente.id_usuario == idUsuario) {
                 return res.json({
                     status: 404,
                     response: {
@@ -62,7 +63,7 @@ export const agregarMascotasUsuario = async (req, res) => {
 
             const insert = await insertarMascota(params);
             if(insert.affectedRows > 0){
-                const hash = hashMD5('masc-'+ insert.insertId + '-user-' + params.idUsuario);
+                const hash = `${req.protocol}://${req.get('host')}/${hashMD5('masc-'+ insert.insertId + '-user-' + params.idUsuario)}`;
                 const rutaLogo = path.join(__dirname, '../Assets/img/logo.jpeg');
                 const qrBase64 = await generarQRConEstilo(hash, rutaLogo);
                 const ruta = guardarImagenBase64(qrBase64, idUsuario, 'qr_' + insert.insertId, req);                
@@ -99,8 +100,8 @@ export const agregarMascotasUsuario = async (req, res) => {
         res.status(500).json({
             status: 500,
             response: {
-                //text: `Someting goes wrong ${error}`
-                text: 'Ha ocurrido un error, intente nuevamente'
+                text: `Someting goes wrong ${error}`
+                //text: 'Ha ocurrido un error, intente nuevamente'
             }
         });
     }
@@ -127,7 +128,7 @@ export const obtenerMascotasUsuario = async (req, res) => {
             const reporte = await obtenerReportePorMascota(mascota.id_mascota);
 
             dto.gallery = galeria.map((foto, index) => mascotaGaleriaDTO(foto, index));
-            dto.icon = iconDTO(reporte.length > 0);
+            dto.icon = iconDTO(reporte != null);
             mascotasDTO.push(dto);
         }
 
@@ -233,3 +234,34 @@ export const editarMascotasUsuario = async (req, res) => {
         });
     }
 }
+
+export const verFichaMascotaPorSha = async (req, res) => {
+    const { sha } = req.params;
+
+    if (!sha || sha.trim() === '') {
+        return res.redirect('/');
+    }
+
+    try {
+        const mascota = await obtenerMascotaPorSha(sha);
+
+        if (!mascota) {
+           return res.render('error404');
+        }
+
+        const galeria = await obtenerGaleriaPorMascota(mascota.id_mascota);
+        const mascotaAdaptada = mascotaDTO(mascota);
+        const usuario = await obtenerUsuarioPorId(mascota.id_usuario);
+        mascotaAdaptada.gallery = galeria.map((foto, i) => mascotaGaleriaDTO(foto, i));
+        res.render('fichaMascota', {
+            sha: sha,
+            mascota: mascotaAdaptada,
+            usuario: usuario
+        });
+    } catch (error) {
+        console.error('Error en verFichaMascotaPorSha:', error);
+        res.status(500).render('error', {
+            mensaje: 'Ha ocurrido un error al cargar la mascota.'
+        });
+    }
+};

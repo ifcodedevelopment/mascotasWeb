@@ -63,7 +63,7 @@ export const addReporte = async (req, res) => {
 
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.idMascota);
-            if (reportes.length > 0) {
+            if (reportes != null) {
                 return res.json({
                     status: 404,
                     response: {
@@ -133,7 +133,7 @@ export const editReporte = async (req, res) => {
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.idMascota);
             
-            if(reportes.length == 0){
+            if(reportes != null){
                 return res.json({
                     status: 404,
                     response: {

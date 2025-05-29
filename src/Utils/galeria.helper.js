@@ -3,7 +3,7 @@ export const asegurarImagenFavorita = (galery = []) => {
 
     const tieneFavorite = galery.some(img => img.favorite === true);
 
-    if (!tieneFavorite && galery.length > 0) {
+    if (!tieneFavorite && galery != null) {
         galery[0].favorite = true;
     }
 

@@ -37,7 +37,7 @@ export const addUsuario = async (req, res) => {
             const usuarioExistente = await obtenerUsuarioPorEmail(params.email);
 
             //si existe el usuario marca error 404
-            if (usuarioExistente.length > 0) {
+            if (usuarioExistente != null) {
                 return res.json({
                     status: 404,
                     response: {
@@ -94,8 +94,8 @@ export const addUsuario = async (req, res) => {
         res.json({
             status: 500,
             response: {
-                //text: `Someting goes wrong ${error}`
-                text: 'Ha ocurrido un error, intente nuevamente'
+                text: `Someting goes wrong ${error}`
+                //text: 'Ha ocurrido un error, intente nuevamente'
             }
         })
     }
@@ -181,7 +181,7 @@ export const setValidacionCodigo = async (req, res) => {
             const usuario = await obtenerUsuarioPorId(req.body.id_usuario);
             if (usuario) {
                 const regex = /^\d{6}$/;
-                let valid = (!regex.test(req.body.codigo) || req.body.codigo.length <= 0 || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
+                let valid = (!regex.test(req.body.codigo) || usuario.us_codigo_app == null || usuario.us_codigo_app != req.body.codigo ? false : true);
                 if (valid) {
                     res.json({
                         status: 200,

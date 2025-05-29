@@ -68,3 +68,10 @@ export const actualizarMascota = async (id, data) => {
         affectedRows: result.affectedRows
     };
 }
+
+export const obtenerMascotaPorSha = async (sha) => {
+    const [rows] = await mysql.query(
+        `SELECT * FROM mascotas WHERE md5(CONCAT('masc-', id_mascota, '-user-', id_usuario)) = ?`, [sha]
+    );
+    return rows.length > 0 ? rows[0] : null;
+};

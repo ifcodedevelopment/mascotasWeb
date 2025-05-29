@@ -26,7 +26,8 @@ export const generarQRConEstilo = async (texto, rutaLogo = null) => {
   const qr = await Jimp.read(qrBuffer);
 
   // Crear sombra
-  const sombra = new Jimp(qr.bitmap.width + 20, qr.bitmap.height + 20, 0x00000000);
+  //const sombra = new Jimp(qr.bitmap.width + 20, qr.bitmap.height + 20, 0x00000000);
+  const sombra = new Jimp(qr.bitmap.width, qr.bitmap.height, 0x00000000);
   const blur = qr.clone().blur(8).opacity(0.25);
   sombra.composite(blur, 10, 10);
   sombra.composite(qr, 0, 0);

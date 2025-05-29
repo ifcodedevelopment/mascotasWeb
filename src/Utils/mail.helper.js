@@ -1,3 +1,6 @@
+import nodemailer from 'nodemailer';
+import { MAIL_PASS, MAIL_USER } from '../Config/config.js';
+
 /**
  * 
  * @param  mail es un arreglo de datos que contiene el mail to, subject y html
