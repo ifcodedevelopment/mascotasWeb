@@ -33,11 +33,12 @@ export const obtenerMascotasUsuario = async (req, res) => {
         }
 
         res.json({
-            status: 200,
-            response: {
-                text: "Información encontrada correctamente",
-                mascotas: mascotasDTO,
-            },
+          status: 200,
+          response: {
+            text: "Información encontrada correctamente",
+            mascotas: mascotasDTO,
+            idLastNotification: null
+          },
         });
     } catch (error) {
         res.status(500).json({
