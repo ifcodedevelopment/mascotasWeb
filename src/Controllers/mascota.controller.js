@@ -1,11 +1,10 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
+import { mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
 import { eliminarGaleria, insertarGaleria, obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
 import { actualizarMascota, insertarMascota, obtenerMascotaNombreFechaNac, obtenerMascotaPorSha, obtenerMascotasPorId, obtenerMascotasPorUsuario, updateUrlQR } from "../Models/mascota.model.js";
-import { obtenerReportePorMascota } from "../Models/reporte.model.js";
 import { asegurarImagenFavorita } from "../Utils/galeria.helper.js";
 import { hashMD5 } from "../Utils/hash.helper.js";
 import { mascotaAddSchema, mascotaEditSchema } from "../Validators/mascota.validator.js";
@@ -106,50 +105,6 @@ export const agregarMascotasUsuario = async (req, res) => {
         });
     }
 }
-
-export const obtenerMascotasUsuario = async (req, res) => {
-    try {
-        const idUsuario = req.idUsuario; // Middleware debe haberlo inyectado
-        if (!idUsuario) {
-            return res.status(400).json({
-                status: 400,
-                  response: {
-                    text: 'ID de usuario no proporcionado en el token.'
-                }
-            });
-        }
-
-        const mascotas = await obtenerMascotasPorUsuario(idUsuario);
-
-        const mascotasDTO = [];
-        for (const mascota of mascotas) {
-            const dto = mascotaDTO(mascota);
-            const galeria = await obtenerGaleriaPorMascota(mascota.id_mascota);
-            const reporte = await obtenerReportePorMascota(mascota.id_mascota);
-
-            dto.gallery = galeria.map((foto, index) => mascotaGaleriaDTO(foto, index));
-            dto.icon = iconDTO(reporte != null);
-            mascotasDTO.push(dto);
-        }
-
-        res.json({
-            status: 200,
-            response: {
-                text: "Mascotas encontradas satisfactoriamente",
-                mascotas: mascotasDTO
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: 500,
-            response: {
-                //text: `Someting goes wrong ${error}`
-                text: 'Ha ocurrido un error, intente nuevamente'
-            }
-        });
-    }
-};
-
 
 export const editarMascotasUsuario = async (req, res) => {
     try {
