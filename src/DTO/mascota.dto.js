@@ -3,7 +3,7 @@ import { formatDate_DMY } from "../Utils/date.helper.js";
 export const mascotaDTO = (mascota) => ({
     id: mascota.id_mascota,
     nombre_mascota: mascota.ms_nombre,
-    fecha_nacimiento: formatDate_DMY(mascota.ms_fecha_nac),
+    fecha_nacimiento: mascota.ms_fecha_nac,
     gallery: [],
     tipo: mascota.ms_tipo,
     icon: {},

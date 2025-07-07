@@ -5,6 +5,14 @@ export const obtenerMascotasPorUsuario = async (id) => {
     return rows;
 };
 
+export const obtenerMascotasPorUsuarioOrdenado = async (id) => {
+    const [rows] = await mysql.query(
+        "SELECT * FROM mascotas WHERE id_usuario = ? ORDER BY id_usuario DESC",
+        [id]
+    );
+    return rows;
+};
+
 export const obtenerMascotasPorId = async (id) => {
     const [rows] = await mysql.query('SELECT * FROM mascotas WHERE id_mascota = ?', [id]);
     return rows;

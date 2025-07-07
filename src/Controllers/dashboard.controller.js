@@ -1,7 +1,7 @@
 import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
 import { obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
-import { obtenerMascotasPorUsuario } from "../Models/mascota.model.js";
+import { obtenerMascotasPorUsuario, obtenerMascotasPorUsuarioOrdenado } from "../Models/mascota.model.js";
 import { obtenerReportePorMascota } from "../Models/reporte.model.js";
 
 
@@ -17,7 +17,7 @@ export const obtenerMascotasUsuario = async (req, res) => {
             });
         }
 
-        const mascotas = await obtenerMascotasPorUsuario(idUsuario);
+        const mascotas = await obtenerMascotasPorUsuarioOrdenado(idUsuario);
 
         const mascotasDTO = [];
         for (const mascota of mascotas) {
