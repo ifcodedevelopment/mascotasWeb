@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { agregarMascotasUsuario, editarMascotasUsuario, verFichaMascotaPorSha } from "../Controllers/mascota.controller.js";
+import { agregarMascotasUsuario, editarMascotasUsuario, eliminarMascotaUsuario, verFichaMascotaPorSha } from "../Controllers/mascota.controller.js";
 import { validarToken } from "../Middleware/auth.middleware.js";
 
 /**
@@ -127,6 +127,80 @@ router.post('/mascotas/add', validarToken, agregarMascotasUsuario);
  *         description: Error del servidor
  */
 router.post('/mascotas/update', validarToken, editarMascotasUsuario);
+
+/**
+ * @swagger
+ * /mascotas/delete:
+ *   post:
+ *     summary: Eliminar mascota existente
+ *     tags:
+ *       - Mascotas
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Identificador de la mascota a eliminar
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id_mascota
+ *             properties:
+ *               id_mascota:
+ *                 type: integer
+ *                 example: 123
+ *     responses:
+ *       200:
+ *         description: Mascota eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "Se ha eliminado la mascota correctamente"
+ *       404:
+ *         description: Mascota no encontrada o dato inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "No existe la mascota, favor de validar su información"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "Ha ocurrido un error, intente nuevamente"
+ */
+router.post("/mascotas/delete", validarToken, eliminarMascotaUsuario);
 
 /**
  * @swagger

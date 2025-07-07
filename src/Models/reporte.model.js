@@ -35,3 +35,13 @@ export const actualizarReporte = async (id_reporte, data) => {
         affectedRows: result.affectedRows
     };
 }
+
+export const eliminarReporteMascota = async (idMascota) => {
+  const [result] = await mysql.query(
+    `DELETE FROM reportes WHERE id_mascota = ?`,
+    idMascota
+  );
+  return {
+    affectedRows: result.affectedRows,
+  };
+};

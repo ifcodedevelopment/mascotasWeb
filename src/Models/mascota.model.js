@@ -75,3 +75,14 @@ export const obtenerMascotaPorSha = async (sha) => {
     );
     return rows.length > 0 ? rows[0] : null;
 };
+
+
+export const eliminarMascota = async (idMascota) => {
+    const [result] = await mysql.query(
+        `DELETE FROM mascotas WHERE id_mascota = ?`,
+        idMascota
+    );
+    return {
+        affectedRows: result.affectedRows,
+    };
+};

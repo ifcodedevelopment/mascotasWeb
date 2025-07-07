@@ -25,7 +25,8 @@ export const obtenerReportesPorMascotas = async (req, res) => {
             status: 200,
             response: {
                 text: "Reportes encontrados satisfactoriamente",
-                mascotas: reportesDTO
+                mascotas: reportesDTO,
+                type: 1
             }
         });
     } catch (error) {
@@ -67,9 +68,10 @@ export const addReporte = async (req, res) => {
                 return res.json({
                     status: 404,
                     response: {
-                        text: 'No es posible agregar un reporte, la mascota ya cuenta con un reporte activo'
-                    }
-                })
+                        text: "No es posible agregar un reporte, la mascota ya cuenta con un reporte activo",
+                        type: 2
+                    },
+                });
             }
 
             const insert = await insertarReporte(params);
@@ -77,22 +79,25 @@ export const addReporte = async (req, res) => {
                 res.json({
                     status: 200,
                     response: {
-                        text: 'Se ha agregado el reporte correctamente'
-                    }
-                })
+                        text: "Se ha agregado el reporte correctamente",
+                        type: 1
+                    },
+                });
             } else {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'Ha ocurrido un error, intente nuevamente'
-                    }
-                })
+                        text: "Ha ocurrido un error, intente nuevamente",
+                        type: 2
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'Ha ocurrido un error, favor de validar su información'
+                    text: 'Ha ocurrido un error, favor de validar su información',
+                    type: 3
                 }
             })
         }
@@ -100,7 +105,8 @@ export const addReporte = async (req, res) => {
         res.json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`
+                text: `Someting goes wrong ${error}`,
+                type: 3
                 //text: 'Ha ocurrido un error, intente nuevamente'
             }
         })
@@ -132,23 +138,25 @@ export const editReporte = async (req, res) => {
 
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.idMascota);
-            
-            if(reportes != null){
+
+            if (reportes != null) {
                 return res.json({
                     status: 404,
                     response: {
-                        text: 'No es posible editar este reporte, la mascota no cuenta con reportes abiertos'
-                    }
-                })
+                        text: "No es posible editar este reporte, la mascota no cuenta con reportes abiertos",
+                        type: 2
+                    },
+                });
             }
 
             if (reportes.id_mascota != params.idMascota) {
                 return res.json({
                     status: 404,
                     response: {
-                        text: 'No es posible editar este reporte, el reporte no corresponde a la mascota'
-                    }
-                })
+                        text: "No es posible editar este reporte, el reporte no corresponde a la mascota",
+                        type: 2,
+                    },
+                });
             }
 
             const update = await actualizarReporte(reportes.id_reporte, params);
@@ -156,32 +164,36 @@ export const editReporte = async (req, res) => {
                 res.json({
                     status: 200,
                     response: {
-                        text: 'Se ha actualizado el reporte correctamente'
-                    }
-                })
+                        text: "Se ha actualizado el reporte correctamente",
+                        type: 1
+                    },
+                });
             } else {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'Ha ocurrido un error, intente nuevamente'
-                    }
-                })
+                        text: "Ha ocurrido un error, intente nuevamente",
+                        type: 3
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'Ha ocurrido un error, favor de validar su información'
-                }
-            })
+                    text: "Ha ocurrido un error, favor de validar su información",
+                    type: 3
+                },
+            });
         }
     } catch (error) {
         res.json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`
+                text: `Someting goes wrong ${error}`,
+                type: 3
                 //text: 'Ha ocurrido un error, intente nuevamente'
-            }
-        })
+            },
+        });
     }
 }

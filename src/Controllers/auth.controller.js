@@ -9,6 +9,7 @@ import { EXPIRES_KEY_JWT, SECRET_KEY_JWT } from '../Config/config.js';
 import { getDate } from '../Utils/date.helper.js';
 import { mailSend } from '../Utils/mail.helper.js';
 import { ID_ESTATUS_USUARIO_ACTIVO } from '../Config/constants.js';
+import { text } from 'stream/consumers';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +33,14 @@ export const authLogin = async (req, res) => {
                     status: 200,
                     response: {
                         user: {
-                            img: req.protocol + '://' + req.get('host') + '/uploads/' + (usuario.us_foto != null ? usuario.us_foto : 'perfil.jpg'),
+                            img:
+                                req.protocol +
+                                "://" +
+                                req.get("host") +
+                                "/uploads/" +
+                                (usuario.us_foto != null
+                                    ? usuario.us_foto
+                                    : "perfil.jpg"),
                             names: usuario.nombre,
                             firstLast: usuario.us_apellido_p,
                             secondLast: usuario.us_apellido_m,
@@ -42,10 +50,16 @@ export const authLogin = async (req, res) => {
                             landline: usuario.us_telefono_fijo,
                             email: usuario.us_email,
                             password: usuario.us_password,
-                            token: jwt.sign({ id: usuario.id_usuario }, SECRET_KEY_JWT, { expiresIn: EXPIRES_KEY_JWT })
-                        }
-                    }
-                })
+                            token: jwt.sign(
+                                { id: usuario.id_usuario },
+                                SECRET_KEY_JWT,
+                                { expiresIn: EXPIRES_KEY_JWT }
+                            ),
+                        },
+                    },
+                    text: "Se ha autenticado correctamente",
+                    type: 1,
+                });
 
             } else {
                 const codigo = await obtenerCodigoPorUsuario(usuario.id_usuario);
@@ -69,23 +83,26 @@ export const authLogin = async (req, res) => {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'La cuenta aún no ha sido activada, revisa tu bandeja de entrada y/o SPAM'
-                    }
-                })
+                        text: "La cuenta aún no ha sido activada, revisa tu bandeja de entrada y/o SPAM",
+                        type: 2
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'El usuario y/o contraseña son incorrectos'
-                }
-            })
+                    text: "El usuario y/o contraseña son incorrectos",
+                    type: 3,
+                },
+            });
         }
     } else {
         res.json({
             status: 404,
             response: {
-                text: 'Usuario y/o contraseña incorrectos'
+                text: 'Usuario y/o contraseña incorrectos',
+                type: 3
             }
         })
     }

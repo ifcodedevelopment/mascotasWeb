@@ -43,3 +43,6 @@ export const mascotaEditSchema = Joi.object({
 });
 
   
+export const mascotaDeleteSchema = Joi.object({
+  idMascota: Joi.number().required() 
+})

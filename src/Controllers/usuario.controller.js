@@ -41,8 +41,9 @@ export const addUsuario = async (req, res) => {
                 return res.json({
                     status: 404,
                     response: {
-                        text: 'Ya existe un usuario con ese email, favor de validar su información'
-                    }
+                        text: "Ya existe un usuario con ese email, favor de validar su información",
+                        type: 2
+                    },
                 });
             }
 
@@ -78,26 +79,29 @@ export const addUsuario = async (req, res) => {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'Ha ocurrido un error, intente nuevamente'
-                    }
-                })
+                        text: "Ha ocurrido un error, intente nuevamente",
+                        type: 2
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'Ha ocurrido un error, favor de validar su información'
-                }
-            })
+                    text: "Ha ocurrido un error, favor de validar su información",
+                    type: 3
+                },
+            });
         }
     } catch (error) {
         res.json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`
+                text: `Someting goes wrong ${error}`,
+                type: 3
                 //text: 'Ha ocurrido un error, intente nuevamente'
-            }
-        })
+            },
+        });
     }
 }
 
@@ -142,27 +146,32 @@ export const sendCodigoRecuperacion = async (req, res) => {
                 }
 
                 res.json({
-                    status: (send_mail ? 200 : 400),
+                    status: send_mail ? 200 : 400,
                     response: {
-                        text: (send_mail ? 'Se ha enviado correctamente el código' : 'Ha ocurrido un error, intente nuevamente'),
-                        id_usuario: (send_mail ? usuario.id_usuario : null)
-                    }
-                })
+                        text: send_mail
+                            ? "Se ha enviado correctamente el código"
+                            : "Ha ocurrido un error, intente nuevamente",
+                        id_usuario: send_mail ? usuario.id_usuario : null,
+                    },
+                    type: send_mail ? 1 : 2
+                });
             } else {
                 res.json({
                     status: 404,
                     response: {
                         text: "El correo proporcionado no se encuentra registrado",
+                        type: 3
                     },
-                })
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
                     text: "Ha ocurrido un error, intente nuevamente",
+                    type: 3
                 },
-            })
+            });
         }
     } catch (error) {
         res.json({
@@ -170,8 +179,9 @@ export const sendCodigoRecuperacion = async (req, res) => {
             response: {
                 //text: `Someting goes wrong ${error}`
                 text: "Ha ocurrido un error, intente nuevamente",
+                type: 3
             },
-        })
+        });
     }
 }
 
@@ -186,42 +196,47 @@ export const setValidacionCodigo = async (req, res) => {
                     res.json({
                         status: 200,
                         response: {
-                            text: 'Codigo valido',
-                            id_usuario: usuario.id_usuario
-                        }
-                    })
+                            text: "Codigo valido",
+                            id_usuario: usuario.id_usuario,
+                        },
+                        type: 1
+                    });
                 } else {
                     res.json({
                         status: 404,
                         response: {
-                            text: 'El codigo introducido no es valido, favor de verificarlo'
-                        }
-                    })
+                            text: "El codigo introducido no es valido, favor de verificarlo",
+                        },
+                        type: 2
+                    });
                 }
             } else {
                 res.json({
                     status: 404,
                     response: {
                         text: "Ha ocurrido un error, el usuario no existe",
+                        type: 3
                     },
-                })
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: "Ha ocurrido un error, intente nuevamente"
+                    text: "Ha ocurrido un error, intente nuevamente",
+                    type: 3
                 },
-            })
+            });
         }
     } catch (error) {
         res.json({
             status: 500,
             response: {
-                text: "Ha ocurrido un error, intente nuevamente" + error
-                //text: "Ha ocurrido un error, intente nuevamente"
+                //text: "Ha ocurrido un error, intente nuevamente" + error
+                text: "Ha ocurrido un error, intente nuevamente",
+                type: 3
             },
-        })
+        });
     }
 }
 
@@ -235,41 +250,46 @@ export const updatePassword = async (req, res) => {
                     res.json({
                         status: 200,
                         response: {
-                            text: 'Se ha actualizado correctamente su contraseña'
-                        }
+                            text: "Se ha actualizado correctamente su contraseña",
+                            type: 1
+                        },
                     });
                 } else {
                     res.json({
                         status: 404,
                         response: {
-                            text: 'Ha ocurrido un error, intente nuevamente'
-                        }
-                    })
+                            text: "Ha ocurrido un error, intente nuevamente",
+                            type: 2
+                        },
+                    });
                 }
             } else {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'El usuario no existe, favor de validar su información'
-                    }
-                })
+                        text: "El usuario no existe, favor de validar su información",
+                        type: 3
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'Ha ocurrido un error, favor de validar su información'
-                }
-            })
+                    text: "Ha ocurrido un error, favor de validar su información",
+                    type: 3
+                },
+            });
         }
     } catch (error) {
         res.json({
             status: 500,
             response: {
-                text: "Ha ocurrido un error, intente nuevamente" + error
-                //text: "Ha ocurrido un error, intente nuevamente"
+                //text: "Ha ocurrido un error, intente nuevamente" + error
+                text: "Ha ocurrido un error, intente nuevamente",
+                type: 3
             },
-        })
+        });
     }
 }
 
@@ -308,8 +328,9 @@ export const updateUsuario = async (req, res) => {
                 return res.json({
                     status: 404,
                     response: {
-                        text: 'Ya existe un usuario con ese email, favor de validar su información'
-                    }
+                        text: "Ya existe un usuario con ese email, favor de validar su información",
+                        type: 2
+                    },
                 });
             }
 
@@ -320,32 +341,36 @@ export const updateUsuario = async (req, res) => {
                 res.json({
                     status: 200,
                     response: {
-                        text: 'Se ha actualizado la cuenta correctamente'
-                    }
-                })
+                        text: "Se ha actualizado la cuenta correctamente",
+                        type: 1
+                    },
+                });
             } else {
                 res.json({
                     status: 404,
                     response: {
-                        text: 'Ha ocurrido un error, intente nuevamente'
-                    }
-                })
+                        text: "Ha ocurrido un error, intente nuevamente",
+                        type: 2
+                    },
+                });
             }
         } else {
             res.json({
                 status: 404,
                 response: {
-                    text: 'Ha ocurrido un error, favor de validar su información'
-                }
-            })
+                    text: "Ha ocurrido un error, favor de validar su información",
+                    type: 3
+                },
+            });
         }
     } catch (error) {
         res.json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`
-                //text: 'Ha ocurrido un error, intente nuevamente'
-            }
-        })
+                //text: `Someting goes wrong ${error}`
+                text: "Ha ocurrido un error, intente nuevamente",
+                type: 3
+            },
+        });
     }
 }
