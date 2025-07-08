@@ -24,6 +24,7 @@ export const obtenerMascotasUsuario = async (req, res) => {
             const dto = mascotaDTO(mascota);
             const galeria = await obtenerGaleriaPorMascota(mascota.id_mascota);
             const reporte = await obtenerReportePorMascota(mascota.id_mascota);
+            console.log(reporte);
 
             const MAX_GALLERY = 4;
             const numPlaceholders = Math.max(MAX_GALLERY - galeria.length, 0);
