@@ -18,6 +18,6 @@ export const mascotaDTO = (mascota) => ({
 });
 
 export const iconDTO = (reporte) => ({
-    icono: (reporte ? "alarm-light" :  "home"),
-    color: (reporte ? "#DC3545" : "#6FCF97")
-})
+  icono: reporte.length > 0 ? "alarm-light" : "home",
+  color: reporte.length > 0 ? "#DC3545" : "#6FCF97",
+});
