@@ -24,26 +24,24 @@ export const obtenerMascotasUsuario = async (req, res) => {
             const dto = mascotaDTO(mascota);
             const galeria = await obtenerGaleriaPorMascota(mascota.id_mascota);
             const reporte = await obtenerReportePorMascota(mascota.id_mascota);
-            console.log(reporte);
 
             const MAX_GALLERY = 4;
-            const numPlaceholders = Math.max(MAX_GALLERY - galeria.length, 0);
 
-            const placeholders = Array.from(
-                { length: numPlaceholders },
-                (_, i) => ({
-                    id_galeria_mascota: null,
-                    url: "",
-                    descripcion: "",
-                    index: i,
-                })
-            );
+            // 1) Mapea todos los items de BD a DTOs
+            const items = galeria.map((foto, i) => mascotaGaleriaDTO(foto, i));
 
-            const reales = galeria.map((foto, i) =>
-                mascotaGaleriaDTO(foto, i + numPlaceholders)
-            );
+            // 2) Separa en vacíos y reales
+            const vacios = items.filter((item) => item.url === "");
+            const reales = items.filter((item) => item.url !== "");
 
-            dto.gallery = [...placeholders, ...reales].slice(0, MAX_GALLERY);
+            // 3) Junta vacíos primero y reales después
+            const ordenados = [...vacios, ...reales];
+
+            // 4) Toma solo los primeros 4 y vuelve a indexar
+            dto.gallery = ordenados
+              .slice(0, MAX_GALLERY)
+              .map((item, newIndex) => ({ ...item, index: newIndex }));
+
             dto.icon = iconDTO(reporte != null);
             mascotasDTO.push(dto);
         }
