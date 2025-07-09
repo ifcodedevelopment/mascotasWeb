@@ -1,8 +1,9 @@
 import { iconDTO, mascotaDTO } from "../DTO/mascota.dto.js";
 import { mascotaGaleriaDTO } from "../DTO/mascota.galeria.dto.js";
+import { reporteDTO } from "../DTO/reporte.dto.js";
 import { obtenerGaleriaPorMascota } from "../Models/mascota.galeria.model.js";
-import { obtenerMascotasPorUsuario, obtenerMascotasPorUsuarioOrdenado } from "../Models/mascota.model.js";
-import { obtenerReportePorMascota } from "../Models/reporte.model.js";
+import { obtenerMascotasPorUsuarioOrdenado } from "../Models/mascota.model.js";
+import { obtenerReportePorMascota, obtenerReportePorMascotasUsuarios } from "../Models/reporte.model.js";
 
 
 export const obtenerMascotasUsuario = async (req, res) => {
@@ -39,18 +40,27 @@ export const obtenerMascotasUsuario = async (req, res) => {
 
             // 4) Toma solo los primeros 4 y vuelve a indexar
             dto.gallery = ordenados
-              .slice(0, MAX_GALLERY)
-              .map((item, newIndex) => ({ ...item, index: newIndex }));
+                .slice(0, MAX_GALLERY)
+                .map((item, newIndex) => ({ ...item, index: newIndex }));
 
             dto.icon = iconDTO(reporte != null);
             mascotasDTO.push(dto);
         }
+
+        const reportes = await obtenerReportePorMascotasUsuarios(idUsuario);
+        const reportesDTO = [];
+        for (const reporte of reportes) {
+            const dto = await reporteDTO(reporte);
+            reportesDTO.push(dto);
+        }
+
 
         res.json({
             status: 200,
             response: {
                 text: "Información encontrada correctamente",
                 mascotas: mascotasDTO,
+                reportes: reportesDTO,
                 idLastNotification: null,
                 type: 1
             },

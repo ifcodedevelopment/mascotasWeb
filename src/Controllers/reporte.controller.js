@@ -63,8 +63,9 @@ export const addReporte = async (req, res) => {
         const { error } = reporteAddSchema.validate(params)
 
         if (!error) {
-            const reportes = await obtenerReportePorMascota(params.idMascota);
-            if (reportes != null) {
+            const reportes = await obtenerReportePorMascota(params.mascota);
+            
+            if (reportes.length > 0) {
                 return res.json({
                     status: 404,
                     response: {
@@ -137,9 +138,8 @@ export const editReporte = async (req, res) => {
         const { error } = reporteEditSchema.validate(params)
 
         if (!error) {
-            const reportes = await obtenerReportePorMascota(params.idMascota);
-
-            if (reportes != null) {
+            const reportes = await obtenerReportePorMascota(params.mascota);
+            if (reportes.length > 0 ) {
                 return res.json({
                     status: 404,
                     response: {
