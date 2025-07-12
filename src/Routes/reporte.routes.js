@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validarToken } from "../Middleware/auth.middleware.js";
-import { addReporte, editReporte, obtenerReportesPorMascotas } from "../Controllers/reporte.controller.js";
+import { addReporte, closeReporte, editReporte, obtenerReportesPorMascotas } from "../Controllers/reporte.controller.js";
 
 /**
  * Metodos reportes 
@@ -132,6 +132,9 @@ router.post('/reportes/add', validarToken, addReporte);
  *         description: Error del servidor
  */
 router.post('/reportes/edit', validarToken, editReporte);
+
+
+router.post("/reportes/close", validarToken, closeReporte);
 
 
 export default router;

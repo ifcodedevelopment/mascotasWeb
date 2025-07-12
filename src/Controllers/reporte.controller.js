@@ -60,7 +60,7 @@ export const addReporte = async (req, res) => {
             adicional: req.body.adicional
         }
 
-        const { error } = reporteAddSchema.validate(params)
+        const { error } = reporteAddSchema.validate(params);
 
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.mascota);
