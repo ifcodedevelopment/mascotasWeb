@@ -197,3 +197,47 @@ export const editReporte = async (req, res) => {
         });
     }
 }
+
+export const closeReporte = async (req, res) => {
+    try {
+        const idUsuario = req.idUsuario; // Middleware debe haberlo inyectado
+        if (!idUsuario) {
+          return res.status(400).json({
+            status: 400,
+            response: {
+              text: "ID de usuario no proporcionado en el token.",
+            },
+          });
+        }
+
+        const params = {
+            mascota: req.body.id_mascota,
+        };
+        const { error } = reporteAddSchema.validate(params);
+        if (!error) {
+            const reportes = await obtenerReportePorMascota(params.mascota);
+            if (reportes.length > 0) {
+                return res.json({
+                    status: 404,
+                    response: {
+                        text: "Ha ocurrido un error, la mascota no cuenta con un reporte activo",
+                        type: 2
+                    },
+                });
+
+                
+            }
+        } else {
+            res.json({
+                status: 404,
+                response: {
+                    text: "Ha ocurrido un error, favor de validar su información",
+                    type: 3
+                },
+            });
+        }
+
+    } catch (error) {
+        
+    }
+}
