@@ -134,7 +134,102 @@ router.post('/reportes/add', validarToken, addReporte);
 router.post('/reportes/edit', validarToken, editReporte);
 
 
-router.post("/reportes/close", validarToken, closeReporte);
-
+/**
+ * @swagger
+ * /reportes/close:
+ *   post:
+ *     summary: Cerrar un reporte de mascota existente
+ *     tags:
+ *       - Reportes
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - qrCode
+ *             properties:
+ *               qrCode:
+ *                 type: string
+ *                 description: Código QR asociado a la mascota cuyo reporte se desea cerrar
+ *     responses:
+ *       200:
+ *         description: Reporte cerrado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "Se ha finalizado el reporte correctamente"
+ *                     type:
+ *                       type: integer
+ *                       example: 1
+ *       400:
+ *         description: ID de usuario no proporcionado en el token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "ID de usuario no proporcionado en el token."
+ *       404:
+ *         description: Error de validación o recurso no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "Ha ocurrido un error, no existen reportes abiertos para esta mascota"
+ *                     type:
+ *                       type: integer
+ *                       example: 2
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 response:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                       example: "Ha ocurrido un error, intente nuevamente"
+ *                     type:
+ *                       type: integer
+ *                       example: 3
+ */
+router.post('/reportes/close', validarToken, closeReporte);
 
 export default router;

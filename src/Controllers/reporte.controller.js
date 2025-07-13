@@ -1,6 +1,7 @@
 import { reporteDTO } from "../DTO/reporte.dto.js";
-import { actualizarReporte, insertarReporte, obtenerReportePorMascota, obtenerReportePorMascotasUsuarios } from "../Models/reporte.model.js";
-import { reporteAddSchema, reporteEditSchema } from "../Validators/reporte.validator.js";
+import { obtenerMascotaPorSha } from "../Models/mascota.model.js";
+import { actualizarReporte, cerrarReporteMascota, insertarReporte, obtenerReportePorMascota, obtenerReportePorMascotasUsuarios } from "../Models/reporte.model.js";
+import { reporteAddSchema, reporteEditSchema, reporteScanSchema } from "../Validators/reporte.validator.js";
 
 export const obtenerReportesPorMascotas = async (req, res) => {
     try {
@@ -64,7 +65,7 @@ export const addReporte = async (req, res) => {
 
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.mascota);
-            
+
             if (reportes.length > 0) {
                 return res.json({
                     status: 404,
@@ -139,7 +140,7 @@ export const editReporte = async (req, res) => {
 
         if (!error) {
             const reportes = await obtenerReportePorMascota(params.mascota);
-            if (reportes.length > 0 ) {
+            if (reportes.length > 0) {
                 return res.json({
                     status: 404,
                     response: {
@@ -190,9 +191,9 @@ export const editReporte = async (req, res) => {
         res.json({
             status: 500,
             response: {
-                text: `Someting goes wrong ${error}`,
-                type: 3
-                //text: 'Ha ocurrido un error, intente nuevamente'
+                //text: `Someting goes wrong ${error}`,
+                type: 3,
+                text: 'Ha ocurrido un error, intente nuevamente'
             },
         });
     }
@@ -202,30 +203,60 @@ export const closeReporte = async (req, res) => {
     try {
         const idUsuario = req.idUsuario; // Middleware debe haberlo inyectado
         if (!idUsuario) {
-          return res.status(400).json({
-            status: 400,
-            response: {
-              text: "ID de usuario no proporcionado en el token.",
-            },
-          });
+            return res.status(400).json({
+                status: 400,
+                response: {
+                    text: "ID de usuario no proporcionado en el token.",
+                },
+            });
         }
 
         const params = {
-            mascota: req.body.id_mascota,
+            codigo: req.body.qrCode,
         };
-        const { error } = reporteAddSchema.validate(params);
+        const { error } = reporteScanSchema.validate(params);
         if (!error) {
-            const reportes = await obtenerReportePorMascota(params.mascota);
-            if (reportes.length > 0) {
+            const mascota = await obtenerMascotaPorSha(params.codigo);
+            if (mascota.length <= 0) {
                 return res.json({
                     status: 404,
                     response: {
-                        text: "Ha ocurrido un error, la mascota no cuenta con un reporte activo",
+                        text: "Ha ocurrido un error, la mascota escaneada no se encuentra registrada",
                         type: 2
                     },
                 });
 
-                
+
+            } else {
+                const reportes = await obtenerReportePorMascota(mascota.id_mascota);
+                if (reportes.length <= 0) {
+                    res.json({
+                        status: 404,
+                        response: {
+                            text: "Ha ocurrido un error, no existen reportes abiertos para esta mascota",
+                            type: 2
+                        },
+                    });
+                } else {
+                    const cerrarReporte = await cerrarReporteMascota(mascota.id_mascota);
+                    if (cerrarReporte.affectedRows > 0) {
+                        res.json({
+                            status: 200,
+                            response: {
+                                text: "Se ha finalizado el reporte correctamente",
+                                type: 1
+                            },
+                        });
+                    } else {
+                        res.json({
+                            status: 404,
+                            response: {
+                                text: "Ha ocurrido un error, intente nuevamente",
+                                type: 2
+                            },
+                        });
+                    }
+                }
             }
         } else {
             res.json({
@@ -238,6 +269,13 @@ export const closeReporte = async (req, res) => {
         }
 
     } catch (error) {
-        
+        res.json({
+            status: 500,
+            response: {
+                text: `Someting goes wrong ${error}`,
+                type: 3,
+                //text: 'Ha ocurrido un error, intente nuevamente'
+            },
+        });
     }
 }

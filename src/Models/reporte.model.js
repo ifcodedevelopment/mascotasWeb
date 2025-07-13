@@ -45,3 +45,11 @@ export const eliminarReporteMascota = async (idMascota) => {
     affectedRows: result.affectedRows,
   };
 };
+
+
+export const cerrarReporteMascota = async (idMascota) => {
+    const [result] = await mysql.query('UPDATE reportes SET rep_fin = ? WHERE id_mascota = ?', [getDate('Y-m-d H:i:s'), idMascota]);
+    return {
+        affectedRows: result.affectedRows
+    }
+}

@@ -20,3 +20,7 @@ export const reporteEditSchema = Joi.object({
 export const reporteDeleteSchema = Joi.object({
     mascota: Joi.number().required()
 })
+
+export const reporteScanSchema = Joi.object({
+    codigo: Joi.string().required()
+})
