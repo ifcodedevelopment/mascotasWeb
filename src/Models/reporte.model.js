@@ -6,6 +6,11 @@ export const obtenerReportePorMascota = async (id) => {
     return rows;
 }
 
+export const obtenerReporteById = async (id) => {
+    const [rows] = await mysql.query('SELECT * from reportes WHERE id_reporte = ?', [id])
+    return rows[0];
+}
+
 export const obtenerReportePorMascotasUsuarios = async (id) => {
     const [rows] = await mysql.query(`SELECT * FROM reportes r INNER JOIN mascotas m ON r.id_mascota = m.id_mascota WHERE id_usuario = ?`, id)
     return rows;

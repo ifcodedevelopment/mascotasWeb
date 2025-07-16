@@ -1,6 +1,7 @@
 import { reporteDTO } from "../DTO/reporte.dto.js";
 import { obtenerMascotaPorSha } from "../Models/mascota.model.js";
-import { actualizarReporte, cerrarReporteMascota, insertarReporte, obtenerReportePorMascota, obtenerReportePorMascotasUsuarios } from "../Models/reporte.model.js";
+import { actualizarReporte, cerrarReporteMascota, insertarReporte, obtenerReporteById, obtenerReportePorMascota, obtenerReportePorMascotasUsuarios } from "../Models/reporte.model.js";
+import { formatDate_YMD } from "../Utils/date.helper.js";
 import { reporteAddSchema, reporteEditSchema, reporteScanSchema } from "../Validators/reporte.validator.js";
 
 export const obtenerReportesPorMascotas = async (req, res) => {
@@ -240,10 +241,13 @@ export const closeReporte = async (req, res) => {
                 } else {
                     const cerrarReporte = await cerrarReporteMascota(mascota.id_mascota);
                     if (cerrarReporte.affectedRows > 0) {
+                        const repo = await obtenerReporteById(reportes[0].id_reporte);
+
                         res.json({
                             status: 200,
                             response: {
                                 text: "Se ha finalizado el reporte correctamente",
+                                end_date: formatDate_YMD(repo.rep_fin),
                                 type: 1
                             },
                         });

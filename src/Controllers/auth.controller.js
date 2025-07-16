@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import { obtenerCodigoPorUsuario, obtenerUsuarioPorEmailPassword, updateTokenUsuario } from "../Models/usuario.model.js";
 import { authLoginSchema } from "../Validators/auth.validator.js"
 import { EXPIRES_KEY_JWT, SECRET_KEY_JWT } from '../Config/config.js';
-import { getDate } from '../Utils/date.helper.js';
+import { formatDate_YMD, getDate } from '../Utils/date.helper.js';
 import { mailSend } from '../Utils/mail.helper.js';
 import { ID_ESTATUS_USUARIO_ACTIVO } from '../Config/constants.js';
 import { text } from 'stream/consumers';
@@ -41,10 +41,10 @@ export const authLogin = async (req, res) => {
                                 (usuario.us_foto != null
                                     ? usuario.us_foto
                                     : "perfil.jpg"),
-                            names: usuario.nombre,
+                            names: usuario.us_nombre,
                             firstLast: usuario.us_apellido_p,
                             secondLast: usuario.us_apellido_m,
-                            birthDate: usuario.us_fecha_nac,
+                            birthDate: formatDate_YMD(usuario.us_fecha_nac),
                             sex: usuario.us_sexo,
                             phoneNumber: usuario.us_telefono,
                             landline: usuario.us_telefono_fijo,
