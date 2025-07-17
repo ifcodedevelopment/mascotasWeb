@@ -50,8 +50,7 @@ export const insertarUsuario = async (data) => {
 export const actualizarUsuario = async (id, data) => {
     const [result] = await mysql.query(
         `UPDATE usuarios
-            SET us_apellido_p= ?, us_apellido_m = ? , us_nombre = ?, us_fecha_nac = ?, us_sexo = ?, us_telefono = ?, us_telefono_fijo = ?, us_email = ?,
-            us_password = ?, us_fecha_updated = ? WHERE id_usuario = ?`, [
+            SET us_apellido_p= ?, us_apellido_m = ? , us_nombre = ?, us_fecha_nac = ?, us_sexo = ?, us_telefono = ?, us_telefono_fijo = ?, us_fecha_updated = ? WHERE id_usuario = ?`, [
         data.apellidoP,
         data.apellidoM,
         data.nombre,
@@ -59,8 +58,6 @@ export const actualizarUsuario = async (id, data) => {
         data.sexo,
         data.telefono,
         data.telefonoFijo,
-        data.email,
-        data.password,
         getDate('Y-m-d H:i:s'),
         id
     ]
@@ -101,4 +98,18 @@ export const updateTokenUsuario = async (token, id) => {
     return {
         affectedRows: result.affectedRows
     };
+}
+
+export const updateFotoUsuario = async (imagen, id) => {
+    const [result] = await mysql.query(`UPDATE usuarios SET us_foto = ? WHERE id_usuario = ?`, [imagen, id]);
+    return {
+        affectedRows: result.affectedRows
+    }
+}
+
+export const updateEmailUsuario = async (email, id) => {
+    const [result] = await mysql.query(`UPDATE usuarios SET us_email = ? WHERE id_usuario = ?`, [email, id]);
+    return {
+        affectedRows: result.affectedRows
+    }
 }

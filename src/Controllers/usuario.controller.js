@@ -1,5 +1,5 @@
 import { usuarioAddSchema, usuarioEditSchema } from "../Validators/usuario.validator.js";
-import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId, updatePasswordUsuario, actualizarUsuario } from "../Models/usuario.model.js";
+import { obtenerUsuarioPorEmail, insertarUsuario, obtenerCodigoPorUsuario, validarCuentaPorCodigo, activarCuentaUsuario, guardarCodigoRecuperacion, obtenerUsuarioPorId, updatePasswordUsuario, actualizarUsuario, updateFotoUsuario, updateEmailUsuario } from "../Models/usuario.model.js";
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -314,7 +314,8 @@ export const updateUsuario = async (req, res) => {
             telefono: req.body.telefono_personal,
             telefonoFijo: req.body.telefono_fijo,
             email: req.body.correo,
-            password: req.body.password
+            password: req.body.password,
+            imagen: req.body.imagen
         }
 
         const { error } = usuarioEditSchema.validate(params)
@@ -338,6 +339,19 @@ export const updateUsuario = async (req, res) => {
             const update = await actualizarUsuario(idUsuario, params);
 
             if (update.affectedRows > 0) {
+                if (params.password != null) {
+                    const updatePassword = await updatePasswordUsuario(params.password, idUsuario);
+                }
+
+
+                if (params.imagen != null) {
+                    const updateFoto = await updateFotoUsuario(params.imagen, idUsuario);
+                }
+
+                if (params.email != null) {
+                    const updateEmail = await updateEmailUsuario(params.email, idUsuario);
+                }
+
                 res.json({
                     status: 200,
                     response: {
@@ -367,8 +381,8 @@ export const updateUsuario = async (req, res) => {
         res.json({
             status: 500,
             response: {
-                //text: `Someting goes wrong ${error}`
-                text: "Ha ocurrido un error, intente nuevamente",
+                text: `Someting goes wrong ${error}`,
+                //text: "Ha ocurrido un error, intente nuevamente",
                 type: 3
             },
         });

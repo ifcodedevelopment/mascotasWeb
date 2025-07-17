@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import fetch from 'node-fetch';
+
 
 import { obtenerCodigoPorUsuario, obtenerUsuarioPorEmailPassword, updateTokenUsuario } from "../Models/usuario.model.js";
 import { authLoginSchema } from "../Validators/auth.validator.js"
@@ -29,18 +31,15 @@ export const authLogin = async (req, res) => {
                 if (req.body.token) {
                     const updateToken = await updateTokenUsuario(req.body.token, usuario.id_usuario);
                 }
+
+                const urlString = "https://congestionpelvicaqueretaro.com/assets/img/perfil.png";
+                const base64String = await urlToBase64(urlString);
+
+
                 res.json({
                     status: 200,
                     response: {
                         user: {
-                            img:
-                                req.protocol +
-                                "://" +
-                                req.get("host") +
-                                "/uploads/" +
-                                (usuario.us_foto != null
-                                    ? usuario.us_foto
-                                    : "perfil.jpg"),
                             names: usuario.us_nombre,
                             firstLast: usuario.us_apellido_p,
                             secondLast: usuario.us_apellido_m,
@@ -50,6 +49,7 @@ export const authLogin = async (req, res) => {
                             landline: usuario.us_telefono_fijo,
                             email: usuario.us_email,
                             password: usuario.us_password,
+                            img: (usuario.us_foto != null ? usuario.us_foto : base64String),
                             token: jwt.sign(
                                 { id: usuario.id_usuario },
                                 SECRET_KEY_JWT,
@@ -107,4 +107,17 @@ export const authLogin = async (req, res) => {
         })
     }
 
+}
+
+async function urlToBase64(url) {
+    try {
+        const response = await fetch(url);
+        const buffer = await response.arrayBuffer();
+        const contentType = response.headers.get('content-type');
+        const base64 = Buffer.from(buffer).toString('base64');
+        return `data:${contentType};base64,${base64}`;
+    } catch (error) {
+        console.error('Error al convertir URL a Base64:', error);
+        throw error;
+    }
 }

@@ -20,8 +20,9 @@ export const usuarioEditSchema = Joi.object({
     sexo: Joi.number().min(1).max(2).required(),
     telefono: Joi.string().allow(null),
     telefonoFijo: Joi.string().allow(null),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(1).max(100).required()
+    email: Joi.string().allow(null),
+    password: Joi.string().allow(null),
+    imagen: Joi.string().allow(null)
 })
 
 export const usuarioDeleteSchema = Joi.object({
