@@ -115,7 +115,7 @@ async function urlToBase64(url) {
         const buffer = await response.arrayBuffer();
         const contentType = response.headers.get('content-type');
         const base64 = Buffer.from(buffer).toString('base64');
-        return `data:${contentType};base64,${base64}`;
+        return `${base64}`;
     } catch (error) {
         console.error('Error al convertir URL a Base64:', error);
         throw error;
